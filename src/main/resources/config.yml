@@ -1,0 +1,12 @@
+# PaperAfk Configuration
+
+# World settings
+afk-world-name: "afk_world"  # Name of the separate world where AFK rooms are created
+
+# Room settings
+room-size: 10                # Size of each player's AFK room in blocks (10 = 10x10)
+room-distance: 100           # Distance between player AFK rooms to prevent overlap
+
+# Permission settings
+require-afk-permission: false      # Whether players need 'paperafk.afk' permission to use /afk
+require-afk-other-permission: true # Whether staff need 'paperafk.afk.other' permission to toggle AFK on other players 

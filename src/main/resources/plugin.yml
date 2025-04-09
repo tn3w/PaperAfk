@@ -1,0 +1,17 @@
+name: PaperAfk
+version: '1.0'
+main: dev.tn3w.paperafk.PaperAfk
+api-version: '1.21'
+description: Afk plugin for Minecraft
+authors: [TN3W]
+commands:
+  afk:
+    description: Go afk or toggle afk status
+    usage: /afk [player]
+permissions:
+  paperafk.afk:
+    description: Allows player to use afk command
+    default: true
+  paperafk.afk.other:
+    description: Allows admin to toggle afk status for other players
+    default: op
