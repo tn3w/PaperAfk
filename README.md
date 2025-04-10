@@ -1,4 +1,5 @@
 # PaperAfk
+
 A Minecraft plugin that allows players to effortlessly teleport to a designated AFK room in a separate world, ensuring they can take breaks without disrupting gameplay. 
 
 ## Features
@@ -22,6 +23,14 @@ A Minecraft plugin that allows players to effortlessly teleport to a designated 
 3. Copy the built JAR (`build/libs/PaperAfk-<VERSION>.jar`) to your server's `plugins` folder
 4. Start the server
 5. Configure the plugin by editing `plugins/PaperAfk/config.yml`
+
+## Formatting
+
+1. Download the latest Google Java formatter jar from the [releases page](https://github.com/google/google-java-format/releases/latest)
+2. Format all Java files:
+   ```bash
+   find src -name "*.java" | xargs java -jar google-java-format.jar --replace
+   ```
 
 ## Configuration
 
