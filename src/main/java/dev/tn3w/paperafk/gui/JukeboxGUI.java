@@ -7,11 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
 import org.bukkit.block.Jukebox;
 import org.bukkit.entity.Player;
@@ -26,7 +28,9 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 public class JukeboxGUI implements Listener {
-  private static final String INVENTORY_TITLE = "§9Jukebox - Select Music";
+  private static final Component INVENTORY_TITLE =
+      Component.text("Jukebox - Select Music")
+          .color(net.kyori.adventure.text.format.NamedTextColor.BLUE);
   private static final int INVENTORY_SIZE = 45;
 
   private static final Map<UUID, Block> playerJukeboxMap = new HashMap<>();
@@ -124,11 +128,11 @@ public class JukeboxGUI implements Listener {
 
     lastInteractedJukebox = jukeboxBlock;
 
-    Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, INVENTORY_TITLE);
+    Inventory inventory = player.getServer().createInventory(null, INVENTORY_SIZE, INVENTORY_TITLE);
 
     ItemStack glassFiller = new ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE);
     ItemMeta glassFillerMeta = glassFiller.getItemMeta();
-    glassFillerMeta.setDisplayName(" ");
+    glassFillerMeta.displayName(Component.text(" "));
     glassFiller.setItemMeta(glassFillerMeta);
 
     for (int i = 0; i < INVENTORY_SIZE; i++) {
@@ -162,12 +166,17 @@ public class JukeboxGUI implements Listener {
         ItemStack disc = new ItemStack(discMaterial);
         ItemMeta discMeta = disc.getItemMeta();
 
-        discMeta.setDisplayName("§e" + discName);
+        discMeta.displayName(
+            Component.text(discName).color(net.kyori.adventure.text.format.NamedTextColor.YELLOW));
 
-        List<String> lore = new ArrayList<>();
-        lore.add("§7Disc #" + discId);
-        lore.add("§7Click to play this music disc");
-        discMeta.setLore(lore);
+        List<Component> lore = new ArrayList<>();
+        lore.add(
+            Component.text("Disc #" + discId)
+                .color(net.kyori.adventure.text.format.NamedTextColor.GRAY));
+        lore.add(
+            Component.text("Click to play this music disc")
+                .color(net.kyori.adventure.text.format.NamedTextColor.GRAY));
+        discMeta.lore(lore);
 
         disc.setItemMeta(discMeta);
         inventory.setItem(slot, disc);
@@ -176,10 +185,15 @@ public class JukeboxGUI implements Listener {
 
     ItemStack stopButton = new ItemStack(Material.BARRIER);
     ItemMeta stopMeta = stopButton.getItemMeta();
-    stopMeta.setDisplayName("§c§lStop Music");
-    List<String> stopLore = new ArrayList<>();
-    stopLore.add("§7Click to stop any playing music");
-    stopMeta.setLore(stopLore);
+    stopMeta.displayName(
+        Component.text("Stop Music")
+            .color(net.kyori.adventure.text.format.NamedTextColor.RED)
+            .decorate(TextDecoration.BOLD));
+    List<Component> stopLore = new ArrayList<>();
+    stopLore.add(
+        Component.text("Click to stop any playing music")
+            .color(net.kyori.adventure.text.format.NamedTextColor.GRAY));
+    stopMeta.lore(stopLore);
     stopButton.setItemMeta(stopMeta);
     inventory.setItem(INVENTORY_SIZE - 5, stopButton);
 
@@ -221,7 +235,7 @@ public class JukeboxGUI implements Listener {
     return formatDiscName(discMaterial.toString());
   }
 
-  // Get the AFK world name from config
+  /** Get the AFK world name from config */
   private static String getAfkWorldName() {
     return plugin.getConfigManager().getAfkWorldName();
   }
@@ -229,67 +243,79 @@ public class JukeboxGUI implements Listener {
   /** Gets the corresponding sound for a music disc */
   private static Sound getDiscSound(Material discMaterial) {
     try {
-      String discName = discMaterial.toString().replace("MUSIC_DISC_", "");
-      return Sound.valueOf("MUSIC_DISC_" + discName);
-    } catch (IllegalArgumentException e) {
-      switch (discMaterial) {
-        case Material.MUSIC_DISC_5:
-          return Sound.MUSIC_DISC_5;
-        case Material.MUSIC_DISC_11:
-          return Sound.MUSIC_DISC_11;
-        case Material.MUSIC_DISC_13:
-          return Sound.MUSIC_DISC_13;
-        case Material.MUSIC_DISC_BLOCKS:
-          return Sound.MUSIC_DISC_BLOCKS;
-        case Material.MUSIC_DISC_CAT:
-          return Sound.MUSIC_DISC_CAT;
-        case Material.MUSIC_DISC_CHIRP:
-          return Sound.MUSIC_DISC_CHIRP;
-        case Material.MUSIC_DISC_FAR:
-          return Sound.MUSIC_DISC_FAR;
-        case Material.MUSIC_DISC_MALL:
-          return Sound.MUSIC_DISC_MALL;
-        case Material.MUSIC_DISC_MELLOHI:
-          return Sound.MUSIC_DISC_MELLOHI;
-        case Material.MUSIC_DISC_OTHERSIDE:
-          return Sound.MUSIC_DISC_OTHERSIDE;
-        case Material.MUSIC_DISC_PIGSTEP:
-          return Sound.MUSIC_DISC_PIGSTEP;
-        case Material.MUSIC_DISC_RELIC:
-          return Sound.MUSIC_DISC_RELIC;
-        case Material.MUSIC_DISC_STAL:
-          return Sound.MUSIC_DISC_STAL;
-        case Material.MUSIC_DISC_STRAD:
-          return Sound.MUSIC_DISC_STRAD;
-        case Material.MUSIC_DISC_WAIT:
+      if (discMaterial == Material.MUSIC_DISC_5) return Sound.MUSIC_DISC_5;
+      if (discMaterial == Material.MUSIC_DISC_11) return Sound.MUSIC_DISC_11;
+      if (discMaterial == Material.MUSIC_DISC_13) return Sound.MUSIC_DISC_13;
+      if (discMaterial == Material.MUSIC_DISC_BLOCKS) return Sound.MUSIC_DISC_BLOCKS;
+      if (discMaterial == Material.MUSIC_DISC_CAT) return Sound.MUSIC_DISC_CAT;
+      if (discMaterial == Material.MUSIC_DISC_CHIRP) return Sound.MUSIC_DISC_CHIRP;
+      if (discMaterial == Material.MUSIC_DISC_FAR) return Sound.MUSIC_DISC_FAR;
+      if (discMaterial == Material.MUSIC_DISC_MALL) return Sound.MUSIC_DISC_MALL;
+      if (discMaterial == Material.MUSIC_DISC_MELLOHI) return Sound.MUSIC_DISC_MELLOHI;
+      if (discMaterial == Material.MUSIC_DISC_OTHERSIDE) return Sound.MUSIC_DISC_OTHERSIDE;
+      if (discMaterial == Material.MUSIC_DISC_PIGSTEP) return Sound.MUSIC_DISC_PIGSTEP;
+      if (discMaterial == Material.MUSIC_DISC_RELIC) return Sound.MUSIC_DISC_RELIC;
+      if (discMaterial == Material.MUSIC_DISC_STAL) return Sound.MUSIC_DISC_STAL;
+      if (discMaterial == Material.MUSIC_DISC_STRAD) return Sound.MUSIC_DISC_STRAD;
+      if (discMaterial == Material.MUSIC_DISC_WAIT) return Sound.MUSIC_DISC_WAIT;
+      if (discMaterial == Material.MUSIC_DISC_WARD) return Sound.MUSIC_DISC_WARD;
+
+      if (hasCreatorDisc && discMaterial == DISC_CREATOR) {
+        try {
+          for (Sound sound : getSounds()) {
+            if (sound.toString().contains("MUSIC_DISC_CREATOR")) {
+              return sound;
+            }
+          }
           return Sound.MUSIC_DISC_WAIT;
-        case Material.MUSIC_DISC_WARD:
-          return Sound.MUSIC_DISC_WARD;
-        default:
-          if (hasCreatorDisc && discMaterial == DISC_CREATOR) {
-            try {
-              return Sound.valueOf("MUSIC_DISC_CREATOR");
-            } catch (IllegalArgumentException ex) {
-              return Sound.MUSIC_DISC_WAIT;
-            }
-          }
-          if (hasCreatorMusicBoxDisc && discMaterial == DISC_CREATOR_MUSIC_BOX) {
-            try {
-              return Sound.valueOf("MUSIC_DISC_CREATOR_MUSIC_BOX");
-            } catch (IllegalArgumentException ex) {
-              return Sound.MUSIC_DISC_13;
-            }
-          }
-          if (hasPrecipiceDisc && discMaterial == DISC_PRECIPICE) {
-            try {
-              return Sound.valueOf("MUSIC_DISC_PRECIPICE");
-            } catch (IllegalArgumentException ex) {
-              return Sound.MUSIC_DISC_PIGSTEP;
-            }
-          }
-          return null;
+        } catch (Exception ex) {
+          return Sound.MUSIC_DISC_WAIT;
+        }
       }
+
+      if (hasCreatorMusicBoxDisc && discMaterial == DISC_CREATOR_MUSIC_BOX) {
+        try {
+          for (Sound sound : getSounds()) {
+            if (sound.toString().contains("MUSIC_DISC_CREATOR_MUSIC_BOX")) {
+              return sound;
+            }
+          }
+          return Sound.MUSIC_DISC_13;
+        } catch (Exception ex) {
+          return Sound.MUSIC_DISC_13;
+        }
+      }
+
+      if (hasPrecipiceDisc && discMaterial == DISC_PRECIPICE) {
+        try {
+          for (Sound sound : getSounds()) {
+            if (sound.toString().contains("MUSIC_DISC_PRECIPICE")) {
+              return sound;
+            }
+          }
+          return Sound.MUSIC_DISC_PIGSTEP;
+        } catch (Exception ex) {
+          return Sound.MUSIC_DISC_PIGSTEP;
+        }
+      }
+
+      String materialName = discMaterial.name();
+      for (Sound sound : getSounds()) {
+        if (sound.toString().equals(materialName)) {
+          return sound;
+        }
+      }
+
+      return null;
+    } catch (Exception e) {
+      return null;
     }
+  }
+
+  /** Helper method to safely get all Sound values */
+  @SuppressWarnings("deprecation")
+  private static Sound[] getSounds() {
+    return Sound.values();
   }
 
   /** Safely stops any playing music at a location and cleans up the record state */
@@ -329,19 +355,25 @@ public class JukeboxGUI implements Listener {
 
       for (Player player : jukeboxBlock.getWorld().getPlayers()) {
         if (player.getLocation().distance(jukeboxBlock.getLocation()) <= 200) {
-          for (Sound sound : Sound.values()) {
+          List<Sound> musicDiscSounds = new ArrayList<>();
+          for (Sound sound : getSounds()) {
+            String soundKey = sound.toString();
+            if (soundKey.contains("MUSIC_DISC") || soundKey.contains("RECORD")) {
+              musicDiscSounds.add(sound);
+            }
+          }
+
+          for (Sound sound : musicDiscSounds) {
             try {
-              if (sound.toString().contains("MUSIC_DISC") || sound.toString().contains("RECORD")) {
-                player.stopSound(sound);
-              }
+              player.stopSound(sound);
             } catch (Exception e) {
               // Ignore errors
             }
           }
 
           try {
-            player.stopSound(org.bukkit.SoundCategory.RECORDS);
-            player.stopSound(org.bukkit.SoundCategory.MUSIC);
+            player.stopSound(SoundCategory.RECORDS);
+            player.stopSound(SoundCategory.MUSIC);
           } catch (Exception e) {
             // Ignore errors
           }
@@ -388,7 +420,7 @@ public class JukeboxGUI implements Listener {
 
   @EventHandler
   public void onInventoryClick(InventoryClickEvent event) {
-    if (event.getView().getTitle().equals(INVENTORY_TITLE)) {
+    if (event.getView().title().toString().contains("Jukebox - Select Music")) {
       event.setCancelled(true);
 
       Player player = (Player) event.getWhoClicked();
@@ -429,7 +461,7 @@ public class JukeboxGUI implements Listener {
 
   @EventHandler
   public void onInventoryClose(InventoryCloseEvent event) {
-    if (event.getView().getTitle().equals(INVENTORY_TITLE)) {
+    if (event.getView().title().toString().contains("Jukebox - Select Music")) {
       Player player = (Player) event.getPlayer();
 
       if (!player.getWorld().getName().equals(getAfkWorldName())) {

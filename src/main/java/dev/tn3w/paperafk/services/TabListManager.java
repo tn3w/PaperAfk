@@ -1,6 +1,9 @@
 package dev.tn3w.paperafk.services;
 
 import dev.tn3w.paperafk.PaperAfk;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
@@ -27,8 +30,9 @@ public class TabListManager {
 
     afkTeam = scoreboard.registerNewTeam("afkPlayers");
     String afkIndicator = plugin.getConfigManager().getAfkIndicator();
-    afkTeam.setSuffix(" §8" + afkIndicator);
-    afkTeam.setColor(org.bukkit.ChatColor.GRAY);
+    afkTeam.suffix(
+        Component.text(" ").append(Component.text(afkIndicator, TextColor.color(0x888888))));
+    afkTeam.color(NamedTextColor.GRAY);
   }
 
   /**
