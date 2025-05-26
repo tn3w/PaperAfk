@@ -2,11 +2,14 @@ package dev.tn3w.paperafk;
 
 import dev.tn3w.paperafk.commands.AfkCommand;
 import dev.tn3w.paperafk.listeners.AfkEventListener;
+import dev.tn3w.paperafk.listeners.TabListListener;
 import dev.tn3w.paperafk.services.AfkService;
+import dev.tn3w.paperafk.services.TabListManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PaperAfk extends JavaPlugin {
   private AfkService afkService;
+  private TabListManager tabListManager;
   private ConfigManager configManager;
 
   @Override
@@ -18,10 +21,20 @@ public class PaperAfk extends JavaPlugin {
     getLogger().info("Setting up AFK world and cleaning up old rooms...");
     afkService.setupAfkWorld();
 
+    tabListManager = new TabListManager(this, afkService);
+    afkService.setTabListManager(tabListManager);
+
+    tabListManager.updateAllPlayers();
+
     getCommand("afk").setExecutor(new AfkCommand(afkService, configManager));
+
     getServer()
         .getPluginManager()
         .registerEvents(new AfkEventListener(afkService, configManager), this);
+    getServer()
+        .getPluginManager()
+        .registerEvents(new TabListListener(tabListManager, afkService), this);
+
     getLogger().info("PaperAfk has been enabled!");
   }
 

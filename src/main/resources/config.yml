@@ -10,3 +10,6 @@ room-distance: 100           # Distance between player AFK rooms to prevent over
 # Permission settings
 require-afk-permission: false      # Whether players need 'paperafk.afk' permission to use /afk
 require-afk-other-permission: true # Whether staff need 'paperafk.afk.other' permission to toggle AFK on other players 
+
+# Display settings
+afk-indicator: "zZ"          # Text to display next to AFK players in the tab list 

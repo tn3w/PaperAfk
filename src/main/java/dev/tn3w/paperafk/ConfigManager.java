@@ -54,11 +54,20 @@ public class ConfigManager {
   }
 
   /**
-   * Checks if staff need 'paperafk.afk.other' permission to toggle AFK on other players
+   * Checks if staff need 'paperafk.afk.other' permission to toggle AFK status for other players
    *
    * @return True if permission is required to use /afk on others
    */
   public boolean isAfkOtherCommandPermissionRequired() {
     return config.getBoolean("require-afk-other-permission", true);
+  }
+
+  /**
+   * Gets the text indicator to show next to AFK players in the tab list
+   *
+   * @return The AFK indicator text
+   */
+  public String getAfkIndicator() {
+    return config.getString("afk-indicator", "zZ");
   }
 }

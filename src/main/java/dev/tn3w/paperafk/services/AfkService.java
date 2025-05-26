@@ -23,6 +23,7 @@ public class AfkService {
   private final Map<UUID, Location> previousLocations = new HashMap<>();
   private final Map<UUID, Location> afkRoomLocations = new HashMap<>();
   private final Map<UUID, Boolean> playerAfkStatus = new HashMap<>();
+  private TabListManager tabListManager;
   private World afkWorld;
 
   public AfkService(PaperAfk plugin, ConfigManager configManager) {
@@ -30,6 +31,15 @@ public class AfkService {
     this.configManager = configManager;
 
     JukeboxGUI.initialize(plugin);
+  }
+
+  /**
+   * Sets the TabListManager reference for updating player tab list entries
+   *
+   * @param tabListManager The TabListManager instance
+   */
+  public void setTabListManager(TabListManager tabListManager) {
+    this.tabListManager = tabListManager;
   }
 
   public void setupAfkWorld() {
@@ -148,6 +158,10 @@ public class AfkService {
 
       playerAfkStatus.put(playerId, false);
       player.sendMessage("§aYou are no longer AFK.");
+
+      if (tabListManager != null) {
+        tabListManager.updatePlayerTabList(player);
+      }
     } else {
       previousLocations.put(playerId, player.getLocation());
       playerAfkStatus.put(playerId, true);
@@ -155,6 +169,10 @@ public class AfkService {
       Location afkLocation = getOrCreateAfkRoom(player);
       player.teleport(afkLocation);
       player.sendMessage("§aYou are now AFK.");
+
+      if (tabListManager != null) {
+        tabListManager.updatePlayerTabList(player);
+      }
 
       Bukkit.getScheduler()
           .runTaskLater(
