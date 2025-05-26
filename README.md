@@ -29,7 +29,7 @@ A Minecraft plugin that allows players to effortlessly teleport to a designated 
 1. Download the latest Google Java formatter jar from the [releases page](https://github.com/google/google-java-format/releases/latest)
 2. Format all Java files:
    ```bash
-   find src -name "*.java" | xargs java -jar google-java-format.jar --replace
+   find src -name "*.java" | xargs java -jar google-java-format.jar --aosp --replace
    ```
 
 ## Configuration
