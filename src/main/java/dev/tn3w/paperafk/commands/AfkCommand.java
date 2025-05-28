@@ -2,6 +2,7 @@ package dev.tn3w.paperafk.commands;
 
 import dev.tn3w.paperafk.ConfigManager;
 import dev.tn3w.paperafk.services.AfkService;
+import dev.tn3w.paperafk.services.CombatManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -12,10 +13,13 @@ import org.bukkit.entity.Player;
 public class AfkCommand implements CommandExecutor {
     private final AfkService afkService;
     private final ConfigManager configManager;
+    private final CombatManager combatManager;
 
-    public AfkCommand(AfkService afkService, ConfigManager configManager) {
+    public AfkCommand(
+            AfkService afkService, ConfigManager configManager, CombatManager combatManager) {
         this.afkService = afkService;
         this.configManager = configManager;
+        this.combatManager = combatManager;
     }
 
     @Override
@@ -31,6 +35,16 @@ public class AfkCommand implements CommandExecutor {
             if (configManager.isAfkCommandPermissionRequired()
                     && !player.hasPermission("paperafk.afk")) {
                 player.sendMessage("§cYou don't have permission to use this command.");
+                return true;
+            }
+
+            // Check if player is in combat
+            if (combatManager.isInCombat(player)) {
+                int remainingSeconds = combatManager.getRemainingCooldown(player);
+                player.sendMessage(
+                        "§cYou cannot use /afk while in combat. Please wait "
+                                + remainingSeconds
+                                + " seconds.");
                 return true;
             }
 

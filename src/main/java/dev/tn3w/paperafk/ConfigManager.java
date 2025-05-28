@@ -97,4 +97,22 @@ public class ConfigManager {
     public boolean showAfkOverlay() {
         return config.getBoolean("auto-afk.show-overlay", true);
     }
+
+    /**
+     * Gets the time in seconds a player must wait after combat before using /afk
+     *
+     * @return Combat cooldown in seconds
+     */
+    public int getCombatCooldownSeconds() {
+        return config.getInt("combat.cooldown-seconds", 30);
+    }
+
+    /**
+     * Checks if administrators can bypass the combat cooldown
+     *
+     * @return True if admins can bypass combat cooldown
+     */
+    public boolean canAdminsBypassCombatCooldown() {
+        return config.getBoolean("combat.admin-bypass", true);
+    }
 }

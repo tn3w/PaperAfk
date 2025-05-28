@@ -2,8 +2,10 @@ package dev.tn3w.paperafk;
 
 import dev.tn3w.paperafk.commands.AfkCommand;
 import dev.tn3w.paperafk.listeners.AfkEventListener;
+import dev.tn3w.paperafk.listeners.CombatListener;
 import dev.tn3w.paperafk.listeners.TabListListener;
 import dev.tn3w.paperafk.services.AfkService;
+import dev.tn3w.paperafk.services.CombatManager;
 import dev.tn3w.paperafk.services.TabListManager;
 
 import org.bukkit.Bukkit;
@@ -14,12 +16,14 @@ public class PaperAfk extends JavaPlugin {
     private AfkService afkService;
     private TabListManager tabListManager;
     private ConfigManager configManager;
+    private CombatManager combatManager;
 
     @Override
     public void onEnable() {
         configManager = new ConfigManager(this);
 
         afkService = new AfkService(this, configManager);
+        combatManager = new CombatManager(this, configManager);
 
         getLogger().info("Setting up AFK world and cleaning up old rooms...");
         afkService.setupAfkWorld();
@@ -29,7 +33,7 @@ public class PaperAfk extends JavaPlugin {
 
         tabListManager.updateAllPlayers();
 
-        getCommand("afk").setExecutor(new AfkCommand(afkService, configManager));
+        getCommand("afk").setExecutor(new AfkCommand(afkService, configManager, combatManager));
 
         getServer()
                 .getPluginManager()
@@ -37,6 +41,7 @@ public class PaperAfk extends JavaPlugin {
         getServer()
                 .getPluginManager()
                 .registerEvents(new TabListListener(tabListManager, afkService), this);
+        getServer().getPluginManager().registerEvents(new CombatListener(combatManager), this);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             afkService.updatePlayerActivity(player);

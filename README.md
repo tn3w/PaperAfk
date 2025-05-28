@@ -8,6 +8,7 @@ A Minecraft plugin that allows players to effortlessly teleport to a designated 
 - **Admin Control**: Staff can toggle AFK status on other players with permission-based commands
 - **Protected Environment**: AFK rooms are fully protected with no damage, block breaking, or item interactions
 - **Auto-AFK**: Players are automatically marked as AFK after a configurable amount of time of inactivity
+- **Combat Cooldown**: Players cannot use /afk while in combat
 
 ## Requirements
 
@@ -47,16 +48,21 @@ room-distance: 100           # Distance between player AFK rooms to prevent over
 
 # Permission settings
 require-afk-permission: false      # Whether players need 'paperafk.afk' permission to use /afk
-require-afk-other-permission: true # Whether staff need 'paperafk.afk.other' permission to toggle AFK on other players 
+require-afk-other-permission: true # Whether staff need 'paperafk.afk.other' permission to toggle AFK on other players
 
 # Display settings
-afk-indicator: "zZ"          # Text to display next to AFK players in the tab list 
+afk-indicator: "zZ"          # Text to display next to AFK players in the tab list
 
 # Auto-AFK settings
 auto-afk:
   enabled: true              # Whether players are automatically marked as AFK after inactivity
   time-minutes: 5            # Time in minutes before a player is automatically marked as AFK
-  show-overlay: true         # Whether to show an overlay on the screen when auto-AFK is triggered 
+  show-overlay: true         # Whether to show an overlay on the screen when auto-AFK is triggered
+
+# Combat settings
+combat:
+  cooldown-seconds: 30       # Time in seconds a player must wait after combat before using /afk
+  admin-bypass: true         # Whether administrators can bypass the combat cooldown
 ```
 
 ## Commands
