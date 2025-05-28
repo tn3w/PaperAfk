@@ -6,6 +6,8 @@ import dev.tn3w.paperafk.listeners.TabListListener;
 import dev.tn3w.paperafk.services.AfkService;
 import dev.tn3w.paperafk.services.TabListManager;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PaperAfk extends JavaPlugin {
@@ -35,6 +37,10 @@ public class PaperAfk extends JavaPlugin {
         getServer()
                 .getPluginManager()
                 .registerEvents(new TabListListener(tabListManager, afkService), this);
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            afkService.updatePlayerActivity(player);
+        }
 
         getLogger().info("PaperAfk has been enabled!");
     }

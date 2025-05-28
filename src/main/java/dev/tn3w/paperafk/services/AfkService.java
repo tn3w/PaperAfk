@@ -4,6 +4,10 @@ import dev.tn3w.paperafk.ConfigManager;
 import dev.tn3w.paperafk.PaperAfk;
 import dev.tn3w.paperafk.gui.JukeboxGUI;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.Title.Times;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,6 +19,7 @@ import org.bukkit.block.Jukebox;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -25,14 +30,21 @@ public class AfkService {
     private final Map<UUID, Location> previousLocations = new HashMap<>();
     private final Map<UUID, Location> afkRoomLocations = new HashMap<>();
     private final Map<UUID, Boolean> playerAfkStatus = new HashMap<>();
+    private final Map<UUID, Long> lastActivityTime = new HashMap<>();
+    private final Map<UUID, Boolean> autoAfkTriggered = new HashMap<>();
     private TabListManager tabListManager;
     private World afkWorld;
+    private int autoAfkTaskId = -1;
 
     public AfkService(PaperAfk plugin, ConfigManager configManager) {
         this.plugin = plugin;
         this.configManager = configManager;
 
         JukeboxGUI.initialize(plugin);
+
+        if (configManager.isAutoAfkEnabled()) {
+            startAutoAfkTask();
+        }
     }
 
     /**
@@ -42,6 +54,118 @@ public class AfkService {
      */
     public void setTabListManager(TabListManager tabListManager) {
         this.tabListManager = tabListManager;
+    }
+
+    /**
+     * Updates a player's last activity time
+     *
+     * @param player The player whose activity time to update
+     */
+    public void updatePlayerActivity(Player player) {
+        lastActivityTime.put(player.getUniqueId(), System.currentTimeMillis());
+
+        if (isPlayerAfk(player) && wasAutoTriggered(player)) {
+            hideAfkOverlay(player);
+            setPlayerAfk(player);
+        }
+    }
+
+    /**
+     * Checks if a player's AFK status was automatically triggered
+     *
+     * @param player The player to check
+     * @return Whether the player's AFK status was automatically triggered
+     */
+    public boolean wasAutoTriggered(Player player) {
+        UUID playerId = player.getUniqueId();
+        return autoAfkTriggered.getOrDefault(playerId, false);
+    }
+
+    /**
+     * Shows the AFK overlay to a player
+     *
+     * @param player The player to show the overlay to
+     */
+    public void showAfkOverlay(Player player) {
+        if (!configManager.showAfkOverlay()) {
+            return;
+        }
+
+        Component title =
+                Component.text("You are now AFK")
+                        .color(net.kyori.adventure.text.format.NamedTextColor.RED)
+                        .decorate(net.kyori.adventure.text.format.TextDecoration.BOLD);
+        Component subtitle =
+                Component.text("Use ")
+                        .color(net.kyori.adventure.text.format.NamedTextColor.GRAY)
+                        .append(
+                                Component.text("/afk")
+                                        .color(
+                                                net.kyori.adventure.text.format.NamedTextColor
+                                                        .WHITE))
+                        .append(
+                                Component.text(" to return to your previous location")
+                                        .color(
+                                                net.kyori.adventure.text.format.NamedTextColor
+                                                        .GRAY));
+
+        Times times =
+                Title.Times.times(
+                        Duration.ofMillis(500), Duration.ofDays(1), Duration.ofSeconds(1));
+
+        Title afkTitle = Title.title(title, subtitle, times);
+        player.showTitle(afkTitle);
+    }
+
+    /**
+     * Hides the AFK overlay from a player
+     *
+     * @param player The player to hide the overlay from
+     */
+    public void hideAfkOverlay(Player player) {
+        player.clearTitle();
+    }
+
+    /** Starts the task to check for inactive players and mark them as AFK */
+    private void startAutoAfkTask() {
+        if (autoAfkTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(autoAfkTaskId);
+        }
+
+        int checkIntervalTicks = 20 * 30;
+
+        autoAfkTaskId =
+                Bukkit.getScheduler()
+                        .scheduleSyncRepeatingTask(
+                                plugin,
+                                () -> {
+                                    if (!configManager.isAutoAfkEnabled()) {
+                                        return;
+                                    }
+
+                                    long inactivityThreshold =
+                                            configManager.getAutoAfkTime() * 60 * 1000;
+                                    long currentTime = System.currentTimeMillis();
+
+                                    for (Player player : Bukkit.getOnlinePlayers()) {
+                                        UUID playerId = player.getUniqueId();
+
+                                        if (!isPlayerAfk(player)
+                                                && lastActivityTime.containsKey(playerId)) {
+                                            long lastActivity = lastActivityTime.get(playerId);
+
+                                            if (currentTime - lastActivity >= inactivityThreshold) {
+                                                autoAfkTriggered.put(playerId, true);
+                                                setPlayerAfk(player);
+                                                if (configManager.showAfkOverlay()) {
+                                                    showAfkOverlay(player);
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                checkIntervalTicks,
+                                checkIntervalTicks);
     }
 
     public void setupAfkWorld() {
@@ -82,7 +206,7 @@ public class AfkService {
                 plugin.getLogger()
                         .warning(
                                 "Could not completely delete the AFK world folder. Some files may"
-                                    + " remain.");
+                                        + " remain.");
             }
         }
 
@@ -163,6 +287,8 @@ public class AfkService {
             }
 
             playerAfkStatus.put(playerId, false);
+            autoAfkTriggered.put(playerId, false);
+            hideAfkOverlay(player);
             player.sendMessage("§aYou are no longer AFK.");
 
             if (tabListManager != null) {
@@ -174,7 +300,12 @@ public class AfkService {
 
             Location afkLocation = getOrCreateAfkRoom(player);
             player.teleport(afkLocation);
-            player.sendMessage("§aYou are now AFK.");
+
+            if (autoAfkTriggered.getOrDefault(playerId, false) && configManager.showAfkOverlay()) {
+                showAfkOverlay(player);
+            } else {
+                player.sendMessage("§aYou are now AFK.");
+            }
 
             if (tabListManager != null) {
                 tabListManager.updatePlayerTabList(player);
@@ -262,10 +393,16 @@ public class AfkService {
     public void cleanupBeforeShutdown() {
         plugin.getLogger().info("Performing cleanup before shutdown...");
 
+        if (autoAfkTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(autoAfkTaskId);
+            autoAfkTaskId = -1;
+        }
+
         for (UUID playerId : playerAfkStatus.keySet()) {
             if (playerAfkStatus.get(playerId)) {
                 Player player = Bukkit.getPlayer(playerId);
                 if (player != null && player.isOnline()) {
+                    hideAfkOverlay(player);
                     if (previousLocations.containsKey(playerId)) {
                         player.teleport(previousLocations.get(playerId));
                         player.sendMessage(
@@ -280,6 +417,8 @@ public class AfkService {
         previousLocations.clear();
         afkRoomLocations.clear();
         playerAfkStatus.clear();
+        lastActivityTime.clear();
+        autoAfkTriggered.clear();
     }
 
     private void createAfkRoom(Location location, String playerName) {

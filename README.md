@@ -7,6 +7,7 @@ A Minecraft plugin that allows players to effortlessly teleport to a designated 
 - **Music System**: Built-in jukebox GUI allowing players to play any music disc with saved preferences
 - **Admin Control**: Staff can toggle AFK status on other players with permission-based commands
 - **Protected Environment**: AFK rooms are fully protected with no damage, block breaking, or item interactions
+- **Auto-AFK**: Players are automatically marked as AFK after a configurable amount of time of inactivity
 
 ## Requirements
 
@@ -50,6 +51,12 @@ require-afk-other-permission: true # Whether staff need 'paperafk.afk.other' per
 
 # Display settings
 afk-indicator: "zZ"          # Text to display next to AFK players in the tab list 
+
+# Auto-AFK settings
+auto-afk:
+  enabled: true              # Whether players are automatically marked as AFK after inactivity
+  time-minutes: 5            # Time in minutes before a player is automatically marked as AFK
+  show-overlay: true         # Whether to show an overlay on the screen when auto-AFK is triggered 
 ```
 
 ## Commands

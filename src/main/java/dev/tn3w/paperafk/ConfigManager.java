@@ -70,4 +70,31 @@ public class ConfigManager {
     public String getAfkIndicator() {
         return config.getString("afk-indicator", "zZ");
     }
+
+    /**
+     * Checks if auto-AFK detection is enabled
+     *
+     * @return True if auto-AFK is enabled
+     */
+    public boolean isAutoAfkEnabled() {
+        return config.getBoolean("auto-afk.enabled", true);
+    }
+
+    /**
+     * Gets the time in minutes before a player is automatically marked as AFK
+     *
+     * @return Time in minutes
+     */
+    public int getAutoAfkTime() {
+        return config.getInt("auto-afk.time-minutes", 5);
+    }
+
+    /**
+     * Checks if the AFK overlay should be shown for auto-AFK
+     *
+     * @return True if overlay should be shown
+     */
+    public boolean showAfkOverlay() {
+        return config.getBoolean("auto-afk.show-overlay", true);
+    }
 }
