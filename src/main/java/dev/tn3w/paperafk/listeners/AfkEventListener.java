@@ -4,6 +4,8 @@ import dev.tn3w.paperafk.ConfigManager;
 import dev.tn3w.paperafk.gui.JukeboxGUI;
 import dev.tn3w.paperafk.services.AfkService;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
+
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -18,7 +20,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -61,7 +62,7 @@ public class AfkEventListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
+    public void onPlayerChat(AsyncChatEvent event) {
         afkService.updatePlayerActivity(event.getPlayer());
     }
 
