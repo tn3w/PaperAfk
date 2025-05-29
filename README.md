@@ -13,7 +13,7 @@ A Minecraft plugin that allows players to effortlessly teleport to a designated 
 ## Requirements
 
 - Paper Minecraft server (version 1.21.4)
-- Java 17 or higher
+- Java 21 or higher
 
 ## Setup
 
